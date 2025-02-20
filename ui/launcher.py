@@ -1,5 +1,5 @@
 import gradio as gr
-from ai_interface import get_model_names, list_models, ChatClient
+from ai_interface import get_model_names, list_models
 from utils import ChatHistory
 
 def launch():
