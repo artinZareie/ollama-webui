@@ -69,11 +69,11 @@ def launch():
         history.append((message, response))
         return "", history
 
-    with gr.Blocks(theme=gr.themes.Soft()) as demo:
+    with gr.Blocks(theme=gr.themes.Soft()) as chat_interface:
         msg_input, chat_history, send_button, model_selector = create_interface()
         
         # Message handlers
         msg_input.submit(generate_response, [msg_input, chat_history, model_selector], [msg_input, chat_history])
         send_button.click(generate_response, [msg_input, chat_history, model_selector], [msg_input, chat_history])
 
-    demo.launch(share=False)
+    chat_interface.launch(share=False)
