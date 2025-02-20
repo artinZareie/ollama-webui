@@ -10,3 +10,10 @@
 pyvenv.cfg
 .venv
 pip-selfcheck.json
+
+# Python cache
+__pycache__/
+
+# Gradio files
+*.gradi
+.gradio/
