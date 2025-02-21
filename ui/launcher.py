@@ -9,6 +9,29 @@ def launch():
 
     models_list = list_models()
 
+    class ChatHistory:
+        def __init__(self):
+            self.history_list = []
+            self.history_dict = []
+
+        def append_user_message(self, message):
+            self.history_list.append((message, None))
+            self.history_dict.append({'role': 'user', 'content': message})
+
+        def append_assistant_message(self, message):
+            self.history_list[-1] = (self.history_list[-1][0], message)
+            self.history_dict.append({'role': 'assistant', 'content': message})
+
+        def get_list(self):
+            return self.history_list
+
+        def get_dict(self):
+            return self.history_dict
+        
+        def clear(self):
+            self.history_list.clear()
+            self.history_dict.clear()
+
     def create_interface():
         """Creates and returns the chat interface components"""
         with gr.Row():
@@ -18,12 +41,12 @@ def launch():
                     label="Select Model",
                     value=get_model_names(models_list)[0]
                 )
+
                 chats = gr.Dataframe(
                     headers=["Chats"],
                     value=[["Chat 1"], ["Chat 2"], ["Chat 3"]],
                     show_label=False
                 )
-            
             with gr.Column(scale=4):
                 chat_history = gr.Chatbot(height=500, bubble_full_width=False)
                 with gr.Row():
@@ -63,16 +86,21 @@ def launch():
         if not message:
             return "", history
 
-        # Simulate a response from the model
-        response = ollama.generate(model=model, prompt=message)['response']
-        
-        history.append((message, response))
-        return "", history
+        chat_history_obj.append_user_message(message)
+
+        response = ollama.chat(
+            model=model,
+            messages=chat_history_obj.get_dict()
+        ).message.content
+
+        chat_history_obj.append_assistant_message(response)
+        return "", chat_history_obj.get_list()
+
+    chat_history_obj = ChatHistory()
 
     with gr.Blocks(theme=gr.themes.Soft()) as chat_interface:
         msg_input, chat_history, send_button, model_selector = create_interface()
         
-        # Message handlers
         msg_input.submit(generate_response, [msg_input, chat_history, model_selector], [msg_input, chat_history])
         send_button.click(generate_response, [msg_input, chat_history, model_selector], [msg_input, chat_history])
 
